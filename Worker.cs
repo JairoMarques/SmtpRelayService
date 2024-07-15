@@ -1,5 +1,4 @@
 using System.Buffers;
-using System.Net;
 using SmtpServer;
 using SmtpServer.Mail;
 using SmtpServer.Protocol;
@@ -13,7 +12,7 @@ public class Worker(ILogger<Worker> logger, Settings settings) : BackgroundServi
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        logger.LogInformation($"Starting SMTP Relay Service. Version 1.0.0");
+        logger.LogInformation($"{DateTime.Now:yyyyMMdd HHmmss} - Starting SMTP Relay Service. Version 1.0.0");
         Directory.CreateDirectory(_queuePath);
 
         var options = new SmtpServerOptionsBuilder()
@@ -50,11 +49,11 @@ public class Worker(ILogger<Worker> logger, Settings settings) : BackgroundServi
                 client.Send(message);
                 client.Disconnect(true);
                 File.Delete(file);
-                logger.LogInformation($"Success send email: {file}");
+                logger.LogInformation($"{DateTime.Now:yyyyMMdd HHmmss} - Success send email from {message.From} to {message.To} with subject: {message.Subject}: {file}");
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, $"Error sending email: {file}");
+                logger.LogError(ex, $"{DateTime.Now:yyyyMMdd HHmmss} - Error sending email: {file}");
             }
         }
     }
@@ -81,7 +80,7 @@ public class Worker(ILogger<Worker> logger, Settings settings) : BackgroundServi
             {
                 return Task.FromResult(true);
             }
-            logger.LogInformation($"IP {remoteIPAddress} address not allowed.");
+            logger.LogInformation($"{DateTime.Now:yyyyMMdd HHmmss} - IP {remoteIPAddress} address not allowed.");
             return Task.FromResult(false);
         }
     }
